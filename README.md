@@ -2,7 +2,16 @@
 
 ### ZMQ
 
-    tested on RP installing from sources libzmq and cppzmq v1.10. see build guide: https://github.com/zeromq/cppzmq/blob/master/README.md
+    tested on RP installing from sources libzmq and cppzmq from master branch. 
+
+    dependencies provided as submodules in ./zeromq/deps
+
+    ```
+    git submodule update --init
+    cd ./zeromq/deps
+    ```
+
+    then follow the build guide: https://github.com/zeromq/cppzmq/blob/master/README.md
 
     to install software:
 ```
