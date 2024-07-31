@@ -31,18 +31,26 @@ link_directories(${AVRO_LIBRARY_DIR})
 
 
 # Add the source files (include all relevant .cpp files here)
-set(SOURCE_DIR 
+set(ProdEx
     # src/main.cpp
-    src/ProdCons.cpp
-    
+    src/producer.cpp
+    # Add other .cpp files if necessary
+)
+set(ConsEx
+    src/consumer.cpp
     # Add other .cpp files if necessary
 )
 
 # Add the executable
-add_executable(HkSerializerTest ${SOURCE_DIR})
+add_executable(prodEx ${ProdEx})
+add_executable(consEx ${ConsEx})
 
-target_include_directories (HkSerializerTest PUBLIC ${INC_DIR})
-target_link_libraries( HkSerializerTest LINK_PUBLIC ${LIBS})
-target_link_libraries(HkSerializerTest  PUBLIC cppzmq)
+target_include_directories (prodEx PUBLIC ${INC_DIR})
+target_link_libraries( prodEx LINK_PUBLIC ${LIBS})
+target_link_libraries(prodEx  PUBLIC cppzmq)
+
+target_include_directories (consEx PUBLIC ${INC_DIR})
+target_link_libraries( consEx LINK_PUBLIC ${LIBS})
+target_link_libraries(consEx  PUBLIC cppzmq)
 
 # Link the Avro library to the executable

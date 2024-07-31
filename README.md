@@ -21,3 +21,5 @@
     cmake ..
     make
 ```
+
+configuration file "config.txt" stored the ip and port of the tcp connection as `<ip>:<port>` place in the same folder of the executables.
