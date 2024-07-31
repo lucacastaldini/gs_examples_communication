@@ -6,7 +6,7 @@
 
     to install software:
 ```
-    cd avrocppexample
+    cd zeromq/
     mkdir build
     cd build 
     cmake ..
