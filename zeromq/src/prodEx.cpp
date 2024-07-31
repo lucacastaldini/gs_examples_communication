@@ -1,11 +1,10 @@
-#include <zmq.hpp>
-#include <iostream>
 #include <random>
 #include <fstream>
-#include <thread>
-#include <atomic>
 #include <csignal>
+#include <atomic>
 #include <condition_variable>
+
+#include "producer.hh"
 
 std::atomic<bool> stop{false};
 
@@ -30,8 +29,7 @@ int main() {
     }
 
     zmq::context_t context(1);
-    zmq::socket_t socket(context, ZMQ_PUSH);
-    socket.bind("tcp://" + ip_port);
+    Producer<int> producer(context, "tcp://" + ip_port);
 
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -40,9 +38,7 @@ int main() {
     int N_mes = 100000000;
     for (int i = 0; i < N_mes && !stop; ++i) {
         int randomValue = distr(gen);
-        zmq::message_t message(sizeof(int));
-        memcpy(message.data(), &randomValue, sizeof(int));
-        socket.send(message, zmq::send_flags::none);
+        producer.produce(randomValue);
     }
 
     return 0;

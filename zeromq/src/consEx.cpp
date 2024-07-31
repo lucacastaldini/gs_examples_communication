@@ -1,10 +1,9 @@
-#include <zmq.hpp>
-#include <iostream>
 #include <fstream>
-#include <thread>
-#include <atomic>
 #include <csignal>
+#include <atomic>
 #include <condition_variable>
+
+#include "consumer.hh"
 
 std::atomic<bool> stop{false};
 
@@ -29,20 +28,18 @@ int main() {
     }
 
     zmq::context_t context(1);
-    zmq::socket_t socket(context, ZMQ_PULL);
-    socket.connect("tcp://" + ip_port);
+    Consumer<int> consumer(context, "tcp://" + ip_port);
 
     int N_cons = 0;
     int N_mes = 100000000;
 
     while (N_cons < N_mes && !stop) {
-        zmq::message_t message;
-        socket.recv(message, zmq::recv_flags::none);
         int value;
-        memcpy(&value, message.data(), sizeof(int));
-        ++N_cons;
-        if (N_cons % 1000000 == 0) {
-            std::cout << "Consumed " << N_cons << " messages." << std::endl;
+        if (consumer.consume(value)) {
+            ++N_cons;
+            if (N_cons % 1000000 == 0) {
+                std::cout << "Consumed " << N_cons << " messages." << std::endl;
+            }
         }
     }
 
