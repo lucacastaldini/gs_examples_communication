@@ -4,3 +4,9 @@
 [submodule "zeromq/deps/cppzmq"]
 	path = zeromq/deps/cppzmq
 	url = https://github.com/zeromq/cppzmq.git
+[submodule "shared_memory/deps/gs_examples_serialization"]
+	path = shared_memory/deps/gs_examples_serialization
+	url = https://github.com/lucacastaldini/gs_examples_serialization.git
+[submodule "zeromq/deps/gs_examples_serialization"]
+	path = zeromq/deps/gs_examples_serialization
+	url = https://github.com/lucacastaldini/gs_examples_serialization.git
