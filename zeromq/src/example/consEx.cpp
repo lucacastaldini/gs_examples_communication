@@ -5,6 +5,8 @@
 
 #include "consumer.hh"
 
+const int N_mes = 100;
+
 std::atomic<bool> stop{false};
 
 void signalHandler(int signal) {
@@ -13,6 +15,19 @@ void signalHandler(int signal) {
         std::cout << "\nSIGINT received. Setting stop flag." << std::endl;
     }
 }
+
+void printVector(const std::vector<uint8_t>& vec) {
+    std::cout << "[";
+    for (size_t i = 0; i < vec.size(); ++i) {
+        // Print the numeric value of each element
+        std::cout << static_cast<int>(vec[i]);
+        if (i != vec.size() - 1) {
+            std::cout << ", ";
+        }
+    }
+    std::cout << "]" << std::endl;
+}
+
 
 int main() {
     std::signal(SIGINT, signalHandler);
@@ -28,14 +43,17 @@ int main() {
     }
 
     zmq::context_t context(1);
-    Consumer<int> consumer(context, "tcp://" + ip_port);
+    Consumer<std::vector<uint8_t>> consumer(context, "tcp://" + ip_port);
 
     int N_cons = 0;
-    int N_mes = 100000000;
+    
 
     while (N_cons < N_mes && !stop) {
-        int value;
+        std::vector<uint8_t> value;
         if (consumer.consume(value)) {
+
+            printVector(value);
+
             ++N_cons;
             if (N_cons % 1000000 == 0) {
                 std::cout << "Consumed " << N_cons << " messages." << std::endl;

@@ -16,7 +16,7 @@ std::queue<std::vector<uint8_t>> serializedQueue;
 
 std::atomic<bool> stop{false};
 
-const int N_mes = 200;
+const int N_mes = 1;
 std::vector<HeaderandWaveform> results;
 
 void signalHandler(int signal) {

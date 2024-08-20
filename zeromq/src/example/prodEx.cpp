@@ -6,6 +6,8 @@
 
 #include "producer.hh"
 
+const int N_mes = 100;
+
 std::atomic<bool> stop{false};
 
 void signalHandler(int signal) {
@@ -29,16 +31,19 @@ int main() {
     }
 
     zmq::context_t context(1);
-    Producer<int> producer(context, "tcp://" + ip_port);
+    Producer<std::vector<uint8_t>> producer(context, "tcp://" + ip_port);
 
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> distr(1, 100);
 
-    int N_mes = 100000000;
+    
     for (int i = 0; i < N_mes && !stop; ++i) {
-        int randomValue = distr(gen);
-        producer.produce(randomValue);
+        std::vector<uint8_t> randomValues ;
+        for (int j = 0 ; j < distr(gen); j++)
+            randomValues.push_back(j);
+
+        producer.produce(randomValues);
     }
 
     return 0;

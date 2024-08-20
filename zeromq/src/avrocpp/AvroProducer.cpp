@@ -17,7 +17,7 @@ std::queue<std::vector<uint8_t>> serializedQueue;
 
 std::atomic<bool> stop{false};
 
-const int N_mes = 200;
+const int N_mes = 1;
 
 void signalHandler(int signal) {
     if (signal == SIGINT) {
@@ -50,6 +50,7 @@ int main() {
         HeaderandWaveform genval = generator.get();
         // print_data(genval);
         ser.encode(&genval);
+        print_data(genval);
         if (i%100 == 0){
             std::cout << "serialized " << i << "msgs" << std::endl;
         }
