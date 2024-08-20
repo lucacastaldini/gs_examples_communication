@@ -12,6 +12,15 @@ public:
         socket.bind(address);
     }
 
+    // Destructor to clean up the socket
+    virtual ~Producer() {
+        try {
+            socket.close();
+        } catch (const zmq::error_t& e) {
+            std::cerr << "Error closing socket: " << e.what() << std::endl;
+        }
+    }
+
     void produce(const T& value) {
         zmq::message_t message(sizeof(T));
         memcpy(message.data(), &value, sizeof(T));
@@ -31,10 +40,19 @@ public:
         socket.bind(address);
     }
 
+    // Destructor to clean up the socket
+    virtual ~Producer() {
+        try {
+            socket.close();
+        } catch (const zmq::error_t& e) {
+            std::cerr << "Error closing socket: " << e.what() << std::endl;
+        }
+    }
+
     void produce(const std::vector<T>& vec) {
         // Serialize the vector size and elements into a single buffer
         size_t size = vec.size();
-        std::cout << "msg size is : " << size << std::endl;
+        // std::cout << "msg size is : " << size << std::endl;
         zmq::message_t message(sizeof(size_t) + size * sizeof(T));
 
         // Copy the size and data into the message buffer

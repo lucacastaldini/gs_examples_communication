@@ -12,6 +12,15 @@ public:
         socket.connect(address);
     }
 
+    // Destructor to clean up the socket
+    virtual ~Consumer() {
+        try {
+            socket.close();
+        } catch (const zmq::error_t& e) {
+            std::cerr << "Error closing socket: " << e.what() << std::endl;
+        }
+    }
+
     bool consume(T& value) {
         zmq::message_t message;
         if (socket.recv(message, zmq::recv_flags::none)) {
@@ -34,13 +43,22 @@ public:
         socket.connect(address);
     }
 
+    // Destructor to clean up the socket
+    virtual ~Consumer() {
+        try {
+            socket.close();
+        } catch (const zmq::error_t& e) {
+            std::cerr << "Error closing socket: " << e.what() << std::endl;
+        }
+    }
+
     bool consume(std::vector<T>& vec) {
         zmq::message_t message;
         if (socket.recv(message, zmq::recv_flags::none)) {
             size_t size ;
             memcpy( &size, message.data(), sizeof(size_t));
 
-            std::cout << "msg size is : " << size << std::endl;
+            // std::cout << "msg size is : " << size << std::endl;
             vec.resize(size);
             
             memcpy( vec.data(), static_cast<char*>(message.data()) + sizeof(size_t),  size * sizeof(T));
