@@ -107,6 +107,8 @@ int main(int argc, char* argv[]) {
     std::cout << "; " << N_mes/comm_seconds.count() << " packet/s\n";
     std::cout << "Deserialization time : " << des_seconds.count() << " seconds";
     std::cout << "; " << N_mes/des_seconds.count() << " packet/s\n";
+    std::cout << "Total Receiving time : " << des_seconds.count() + comm_seconds.count() << " seconds";
+    std::cout << "; " << N_mes/(des_seconds.count() + comm_seconds.count()) << " packet/s\n";
 
     delete consumer;
     context.close();

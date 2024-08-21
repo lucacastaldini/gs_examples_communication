@@ -125,12 +125,14 @@ int main(int argc, char* argv[]) {
 
     // Display the time difference in seconds
     std::cout << "Produced number of messages: " << N_mes << std::endl ;
-    std::cout << "Packer generation time : " << generation_seconds.count() << " seconds";
+    std::cout << "Packet generation time : " << generation_seconds.count() << " seconds";
     std::cout << "; " << N_mes/generation_seconds.count() << " packet/s\n";
     std::cout << "Serialization time : " << serialization_seconds.count() << " seconds";
     std::cout << "; " << N_mes/serialization_seconds.count() << " packet/s\n";
     std::cout << "Communication time : " << comm_seconds.count() << " seconds";
     std::cout << "; " << N_mes/comm_seconds.count() << " packet/s\n";
+    std::cout << "Total Sending time : " << serialization_seconds.count() + comm_seconds.count() << " seconds";
+    std::cout << "; " << N_mes/(serialization_seconds.count() + comm_seconds.count()) << " packet/s\n";
     delete producer;
     context.close();
 

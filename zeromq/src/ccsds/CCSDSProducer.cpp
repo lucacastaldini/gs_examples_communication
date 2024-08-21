@@ -106,7 +106,7 @@ int main(int argc, char* argv[]) {
     std::cout << "Produced number of messages: " << N_mes << std::endl ;
     std::cout << "Packer generation time : " << generation_seconds.count() << " seconds";
     std::cout << "; " << N_mes/generation_seconds.count() << " packet/s\n";
-    std::cout << "Communication time : " << comm_seconds.count() << " seconds";
+    std::cout << "Sending time : " << comm_seconds.count() << " seconds";
     std::cout << "; " << N_mes/comm_seconds.count() << " packet/s\n";
     delete producer;
     context.close();

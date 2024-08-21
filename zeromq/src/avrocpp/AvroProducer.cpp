@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) {
     }
 
     std::queue<std::vector<uint8_t>> serializedQueue;
-    std::vector<HeaderandWaveform> packets(N_mes);
+    
     std::signal(SIGINT, signalHandler);
 
     std::ifstream config("config.txt");
@@ -60,9 +60,12 @@ int main(int argc, char* argv[]) {
     auto t1 = std::chrono::system_clock::now();
 
     std::cout << "Start Generating " << std::endl;
+    std::vector<HeaderandWaveform>* packets = new std::vector<HeaderandWaveform>(N_mes);
 
+    HeaderandWaveform generated;
     for (int i = 0; i < N_mes && !stop; ++i) {
-        packets[i] = (generator.get());
+        generated = generator.get();
+        packets->at(i) = generated;
         
         // std::cout <<  "Sending packet with run id: "<< genval.runID << ", decimation: " << genval.decimation << " and pc: " << genval.counter << std::endl;
        
@@ -75,7 +78,7 @@ int main(int argc, char* argv[]) {
 
     std::cout << "Start Serializing " << std::endl;
     int i = 0;
-    for (const auto& value : packets) {
+    for (const auto& value : *packets) {
         ser.encode(&value);
         
         // std::cout <<  "Sending packet with run id: "<< genval.runID << ", decimation: " << genval.decimation << " and pc: " << genval.counter << std::endl;
@@ -85,6 +88,7 @@ int main(int argc, char* argv[]) {
         i++;
         
     }
+    delete packets;
 
     std::cout << "MAIN:Lenght of queue: " << serializedQueue.size() << std::endl;
 
@@ -125,12 +129,14 @@ int main(int argc, char* argv[]) {
 
     // Display the time difference in seconds
     std::cout << "Produced number of messages: " << N_mes << std::endl ;
-    std::cout << "Packer generation time : " << generation_seconds.count() << " seconds";
+    std::cout << "Packet generation time : " << generation_seconds.count() << " seconds";
     std::cout << "; " << N_mes/generation_seconds.count() << " packet/s\n";
     std::cout << "Serialization time : " << serialization_seconds.count() << " seconds";
     std::cout << "; " << N_mes/serialization_seconds.count() << " packet/s\n";
     std::cout << "Communication time : " << comm_seconds.count() << " seconds";
     std::cout << "; " << N_mes/comm_seconds.count() << " packet/s\n";
+    std::cout << "Total Sending time : " << serialization_seconds.count() + comm_seconds.count() << " seconds";
+    std::cout << "; " << N_mes/(serialization_seconds.count() + comm_seconds.count()) << " packet/s\n";
     delete producer;
     context.close();
 
