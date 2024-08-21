@@ -73,7 +73,7 @@ int main(int argc, char* argv[]) {
     std::cout << "MAIN:Lenght of queue: " << serializedQueue.size() << std::endl;
 
     zmq::context_t context(1);
-    Producer<std::vector<uint8_t>>* producer = new Producer<std::vector<uint8_t>>(context, "tcp://localhost:5555");
+    Producer<std::vector<uint8_t>>* producer = new Producer<std::vector<uint8_t>>(context, "tcp://" + ip_port);
 
     auto t2 = std::chrono::system_clock::now();
 
