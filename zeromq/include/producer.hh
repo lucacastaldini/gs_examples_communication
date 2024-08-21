@@ -4,6 +4,8 @@
 #include <zmq.hpp>
 #include <iostream>
 
+#include "utils.hh"
+
 template <typename T>
 class Producer
 {
@@ -27,22 +29,17 @@ public:
         }
     }
 
-    void produce(const T &value)
+   void produce(const T& value)
     {
-        zmq::message_t message(sizeof(T));
-        memcpy(message.data(), &value, sizeof(T));
-
-        try
+        sendMessage(socket, [value]() -> zmq::message_t
         {
-            if (!socket.send(message, zmq::send_flags::none))
-            {
-                std::cerr << "Error sending message." << std::endl;
-            }
-        }
-        catch (const zmq::error_t &e)
-        {
-            std::cerr << "Error sending message: " << e.what() << std::endl;
-        }
+            // Create a message with the size of T
+            zmq::message_t message(sizeof(T));
+            // Copy the value into the message data
+            memcpy(message.data(), &value, sizeof(T));
+            // Return the message
+            return message;
+        });
     }
 
     private:
@@ -75,17 +72,19 @@ public:
 
         void produce(const std::vector<T> &vec)
         {
-            // Serialize the vector size and elements into a single buffer
-            size_t size = vec.size();
-            // std::cout << "msg size is : " << size << std::endl;
-            zmq::message_t message(sizeof(size_t) + size * sizeof(T));
+            sendMessage(socket, [vec]() -> zmq::message_t
+            {
+                // Serialize the vector size and elements into a single buffer
+                size_t size = vec.size();
+                // std::cout << "msg size is : " << size << std::endl;
+                zmq::message_t message(sizeof(size_t) + size * sizeof(T));
 
-            // Copy the size and data into the message buffer
-            memcpy(message.data(), &size, sizeof(size_t));
-            memcpy(static_cast<char *>(message.data()) + sizeof(size_t), vec.data(), size * sizeof(T));
-
-            // Send the message
-            socket.send(message, zmq::send_flags::none);
+                // Copy the size and data into the message buffer
+                memcpy(message.data(), &size, sizeof(size_t));
+                memcpy(static_cast<char *>(message.data()) + sizeof(size_t), vec.data(), size * sizeof(T));
+                return message;
+            });
+            
         }
 
     private:
@@ -117,6 +116,8 @@ public:
 
         void produce(const std::string &str)
         {
+            sendMessage(socket, [str]() -> zmq::message_t
+            {
             // Serialize the string length and data into a single buffer
             size_t size = str.size();
             zmq::message_t message(sizeof(size_t) + size);
@@ -125,8 +126,8 @@ public:
             memcpy(message.data(), &size, sizeof(size_t));
             memcpy(static_cast<char *>(message.data()) + sizeof(size_t), str.data(), size);
 
-            // Send the message
-            socket.send(message, zmq::send_flags::none);
+            return message;
+            });
         }
 
     private:

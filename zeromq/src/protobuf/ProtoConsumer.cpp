@@ -9,19 +9,9 @@
 
 
 #include "consumer.hh"
-
-#define N_MES_DEF 1
-
-std::atomic<bool> stop{false};
+#include "utils.hh"
 
 std::vector<HeaderandWaveform> results;
-
-void signalHandler(int signal) {
-    if (signal == SIGINT) {
-        stop = true;
-        std::cout << "\nSIGINT received. Setting stop flag." << std::endl;
-    }
-}
 
 int main(int argc, char* argv[]) {
 
@@ -87,7 +77,7 @@ int main(int argc, char* argv[]) {
         if(reader.readMessage(message)){
             results.push_back(message);
         }
-        if(serializedQueue.size() % 1000 )
+        if(serializedQueue.size() % 10000 == 0 )
             std::cout << "Lenght of queue: " << serializedQueue.size() << std::endl;
         
         // std::cout <<  "Received packet with run id: "<< results.back().runID << ", decimation: " << results.back().decimation << " and pc: " << results.back().counter << std::endl;

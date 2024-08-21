@@ -4,17 +4,9 @@
 #include <condition_variable>
 
 #include "consumer.hh"
+#include "utils.hh"
 
 const int N_mes = 100;
-
-std::atomic<bool> stop{false};
-
-void signalHandler(int signal) {
-    if (signal == SIGINT) {
-        stop = true;
-        std::cout << "\nSIGINT received. Setting stop flag." << std::endl;
-    }
-}
 
 void printVector(const std::vector<uint8_t>& vec) {
     std::cout << "[";

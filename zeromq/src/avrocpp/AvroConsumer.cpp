@@ -1,6 +1,5 @@
 #include <fstream>
 #include <csignal>
-#include <atomic>
 #include <condition_variable>
 
 #include "WFSchema.hh"
@@ -8,55 +7,29 @@
 #include "Utils.hh"
 
 #include "consumer.hh"
+#include "utils.hh"
 
 #define N_MES_DEF 1
 
 using namespace WF;
 
-std::atomic<bool> stop{false};
-
 std::vector<HeaderandWaveform> results;
-
-void signalHandler(int signal) {
-    if (signal == SIGINT) {
-        stop = true;
-        std::cout << "\nSIGINT received. Setting stop flag." << std::endl;
-    }
-}
 
 int main(int argc, char* argv[]) {
 
-    int N_mes = N_MES_DEF;
-    if (argc > 1) {
-        // Check if the second argument is a valid integer
-        try {
-            N_mes = std::stoi(argv[1]); // Convert the argument to an integer
-        } catch (const std::invalid_argument& e) {
-            std::cerr << "Invalid argument: " << argv[1] << ". Using default value of " << N_mes << "." << std::endl;
-        } catch (const std::out_of_range& e) {
-            std::cerr << "Argument out of range: " << argv[1] << ". Using default value of " << N_mes << "." << std::endl;
-        }
-    } else {
-        std::cout << "No argument provided. Using default value of " << N_mes << "." << std::endl;
-    }
-
     std::signal(SIGINT, signalHandler);
+    
+    const int N_mes = parseArguments(argc, argv);
+    const int N_mes_update = getMessageUpdate(N_mes);
+    std::cout << "message update every " << N_mes_update << " msgs" << std::endl;
 
-    std::ifstream config("config.txt");
-    std::string ip_port;
-    if (config.is_open()) {
-        std::getline(config, ip_port);
-        config.close();
-    } else {
-        std::cerr << "Unable to open config file!" << std::endl;
-        return 1;
-    }
+    std::string ip_port = getIpPortFromConfig("config.txt");
+
 
     std::queue<std::vector<uint8_t>> serializedQueue;
  
     auto dser = AvroDeserializer<HeaderandWaveform>(serializedQueue);
 
-    
 
     std::cout << "Start Receiving " << std::endl;
 

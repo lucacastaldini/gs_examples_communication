@@ -10,17 +10,7 @@
 
 
 #include "producer.hh"
-
-#define N_MES_DEF 1
-
-std::atomic<bool> stop{false};
-
-void signalHandler(int signal) {
-    if (signal == SIGINT) {
-        stop = true;
-        std::cout << "\nSIGINT received. Setting stop flag." << std::endl;
-    }
-}
+#include "utils.hh"
 
 int main(int argc, char* argv[]) {
 
@@ -53,14 +43,15 @@ int main(int argc, char* argv[]) {
 
     auto generator = WFGenerator(1);    
     MessageWriter<HeaderandWaveform> writer(serializedQueue);
-    std::vector<HeaderandWaveform> packets(N_mes);
+    std::vector<HeaderandWaveform>* packets = new std::vector<HeaderandWaveform>(N_mes);
 
     auto t1 = std::chrono::system_clock::now();
 
     std::cout << "Start Generating " << std::endl;
 
     for (int i = 0; i < N_mes && !stop; ++i) {
-        packets[i] = generator.get();
+        packets->at(i) = generator.get();
+        // std::cout << "Packet size: " << packets[i].size() << std::endl;
         
         // std::cout <<  "Sending packet with run id: "<< genval.runID << ", decimation: " << genval.decimation << " and pc: " << genval.counter << std::endl;
        
@@ -74,7 +65,7 @@ int main(int argc, char* argv[]) {
     std::cout << "Start Serializing " << std::endl;
 
     int i = 0;
-    for (const auto& value : packets) {
+    for (const auto& value : *packets) {
 
         writer.writeMessage(value);
         
@@ -84,6 +75,7 @@ int main(int argc, char* argv[]) {
             std::cout << "Serialized " << i << "msgs" << std::endl;
         i++;
     }
+    delete packets;
     std::cout << "MAIN:Lenght of queue: " << serializedQueue.size() << std::endl;
 
     zmq::context_t context(1);

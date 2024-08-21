@@ -22,6 +22,10 @@ set(INC_DIR
     "${PROJECT_SOURCE_DIR}/include"
 )
 
+set(COMM_SRCS
+    "${PROJECT_SOURCE_DIR}/include/utils.cc"
+)
+
 # Find cppzmq wrapper
 find_package(cppzmq REQUIRED)
 find_package(absl REQUIRED)
@@ -31,12 +35,12 @@ list(APPEND LIBS
 )
 
 # Add the executables
-add_executable(prodEx src/example/prodEx.cpp)
-add_executable(consEx src/example/consEx.cpp)
+add_executable(prodEx src/example/prodEx.cpp ${COMM_SRCS})
+add_executable(consEx src/example/consEx.cpp ${COMM_SRCS})
 
 # Add the executables
-add_executable(AvroCppProd src/avrocpp/AvroProducer.cpp)
-add_executable(AvroCppCons src/avrocpp/AvroConsumer.cpp)
+add_executable(AvroCppProd src/avrocpp/AvroProducer.cpp ${COMM_SRCS})
+add_executable(AvroCppCons src/avrocpp/AvroConsumer.cpp ${COMM_SRCS})
 
 
 # Link the libraries to the executables
@@ -63,8 +67,8 @@ if(MSVC AND protobuf_MSVC_STATIC_RUNTIME)
 endif()
 
 # Add the executables
-add_executable(PBCppProd src/protobuf/ProtoProducer.cpp )
-add_executable(PBCppCons src/protobuf/ProtoConsumer.cpp )
+add_executable(PBCppProd src/protobuf/ProtoProducer.cpp ${COMM_SRCS})
+add_executable(PBCppCons src/protobuf/ProtoConsumer.cpp ${COMM_SRCS})
 
 set(GSProtoclBufferSerialization_DIR "${PROJECT_SOURCE_DIR}/deps/gs_examples_serialization/protocol_buffer/build")
 find_library(GSProtoclBufferSerialization_LIB
@@ -79,8 +83,8 @@ target_link_libraries(PBCppCons LINK_PUBLIC ${LIBS} protobuf::libprotobuf GSProt
 add_dependencies(PBCppProd GSProtoclBufferSerialization)
 
 # Add the executables
-add_executable(CCSDSCppProd src/ccsds/CCSDSProducer.cpp )
-add_executable(CCSDSCppCons src/ccsds/CCSDSConsumer.cpp )
+add_executable(CCSDSCppProd src/ccsds/CCSDSProducer.cpp ${COMM_SRCS})
+add_executable(CCSDSCppCons src/ccsds/CCSDSConsumer.cpp ${COMM_SRCS})
 
 target_include_directories(CCSDSCppProd PUBLIC ${INC_DIR} "${PROJECT_SOURCE_DIR}/deps/gs_examples_serialization/ccsds/include")
 target_include_directories(CCSDSCppCons PUBLIC ${INC_DIR} "${PROJECT_SOURCE_DIR}/deps/gs_examples_serialization/ccsds/include")

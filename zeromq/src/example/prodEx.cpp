@@ -5,17 +5,9 @@
 #include <condition_variable>
 
 #include "producer.hh"
+#include "utils.hh"
 
 const int N_mes = 100;
-
-std::atomic<bool> stop{false};
-
-void signalHandler(int signal) {
-    if (signal == SIGINT) {
-        stop = true;
-        std::cout << "\nSIGINT received. Setting stop flag." << std::endl;
-    }
-}
 
 int main() {
     std::signal(SIGINT, signalHandler);
