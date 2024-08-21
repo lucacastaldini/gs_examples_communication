@@ -41,6 +41,7 @@ int main(int argc, char* argv[]) {
     }
 
     std::queue<std::vector<uint8_t>> serializedQueue;
+    std::vector<HeaderandWaveform> packets(N_mes);
     std::signal(SIGINT, signalHandler);
 
     std::ifstream config("config.txt");
@@ -58,11 +59,10 @@ int main(int argc, char* argv[]) {
 
     auto t1 = std::chrono::system_clock::now();
 
-    std::cout << "Start Serializing " << std::endl;
+    std::cout << "Start Generating " << std::endl;
 
     for (int i = 0; i < N_mes && !stop; ++i) {
-        HeaderandWaveform genval = generator.get();
-        ser.encode(&genval);
+        packets[i] = (generator.get());
         
         // std::cout <<  "Sending packet with run id: "<< genval.runID << ", decimation: " << genval.decimation << " and pc: " << genval.counter << std::endl;
        
@@ -70,17 +70,38 @@ int main(int argc, char* argv[]) {
             std::cout << "Serialized " << i << "msgs" << std::endl;
         
     }
+
+    auto t2 = std::chrono::system_clock::now();
+
+    std::cout << "Start Serializing " << std::endl;
+    int i = 0;
+    for (const auto& value : packets) {
+        ser.encode(&value);
+        
+        // std::cout <<  "Sending packet with run id: "<< genval.runID << ", decimation: " << genval.decimation << " and pc: " << genval.counter << std::endl;
+       
+        if ( i % 10000 == 0 )
+            std::cout << "Serialized " << i << "msgs" << std::endl;
+        i++;
+        
+    }
+
     std::cout << "MAIN:Lenght of queue: " << serializedQueue.size() << std::endl;
 
     zmq::context_t context(1);
     Producer<std::vector<uint8_t>>* producer = new Producer<std::vector<uint8_t>>(context, "tcp://" + ip_port);
 
-    auto t2 = std::chrono::system_clock::now();
+    auto t3a = std::chrono::system_clock::now();
 
     std::cout << "Start Sending" << std::endl;
-    
+    bool first = true;
+    std::chrono::_V2::system_clock::time_point t3b;
     while (!stop)
     {
+        if(first){
+            first = false;
+            t3b = std::chrono::system_clock::now();
+        }
         producer->produce(serializedQueue.front());
         serializedQueue.pop();
         
@@ -95,14 +116,17 @@ int main(int argc, char* argv[]) {
     
     std::cout << "Done" << std::endl;
 
-    auto t3 = std::chrono::system_clock::now();
+    auto t4 = std::chrono::system_clock::now();
     
-    std::chrono::duration<double> serialization_seconds = t2 - t1;
-    std::chrono::duration<double> comm_seconds = t3 - t2;
+    std::chrono::duration<double> generation_seconds = t2 - t1;
+    std::chrono::duration<double> serialization_seconds = t3a - t2;
+    std::chrono::duration<double> comm_seconds = t4 - t3b;
     
 
     // Display the time difference in seconds
     std::cout << "Produced number of messages: " << N_mes << std::endl ;
+    std::cout << "Packer generation time : " << generation_seconds.count() << " seconds";
+    std::cout << "; " << N_mes/generation_seconds.count() << " packet/s\n";
     std::cout << "Serialization time : " << serialization_seconds.count() << " seconds";
     std::cout << "; " << N_mes/serialization_seconds.count() << " packet/s\n";
     std::cout << "Communication time : " << comm_seconds.count() << " seconds";

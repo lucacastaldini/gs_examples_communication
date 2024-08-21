@@ -11,6 +11,7 @@ find_package(protobuf CONFIG REQUIRED)
 
 add_subdirectory("${CMAKE_SOURCE_DIR}/deps/gs_examples_serialization/avrocppexample")
 add_subdirectory("${CMAKE_SOURCE_DIR}/deps/gs_examples_serialization/protocol_buffer")
+add_subdirectory("${CMAKE_SOURCE_DIR}/deps/gs_examples_serialization/ccsds")
 
 set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_STANDARD 17)
@@ -70,12 +71,22 @@ find_library(GSProtoclBufferSerialization_LIB
              NAMES GSProtoclBufferSerialization
              PATHS ${GSProtoclBufferSerialization_DIR})
 # Link the libraries to the executables
-target_include_directories(PBCppProd PUBLIC ${INC_DIR} ${PROTOBUF_INCLUDE_DIRS} "${PROJECT_SOURCE_DIR}/deps/gs_examples_serialization/protocol_buffer/include" "${PROJECT_SOURCE_DIR}/build/deps/gs_examples_serialization/protocol_buffer")
+target_include_directories(PBCppProd PUBLIC ${INC_DIR} "${PROJECT_SOURCE_DIR}/deps/gs_examples_serialization/protocol_buffer/include" "${PROJECT_SOURCE_DIR}/build/deps/gs_examples_serialization/protocol_buffer")
 target_include_directories(PBCppCons PUBLIC ${INC_DIR} "${CMAKE_SOURCE_DIR}/deps/gs_examples_serialization/protocol_buffer/include" "${CMAKE_SOURCE_DIR}/build/deps/gs_examples_serialization/protocol_buffer")
 target_link_libraries(PBCppProd PUBLIC ${LIBS} protobuf::libprotobuf GSProtoclBufferSerialization)
 target_link_libraries(PBCppCons LINK_PUBLIC ${LIBS} protobuf::libprotobuf GSProtoclBufferSerialization)
 
 add_dependencies(PBCppProd GSProtoclBufferSerialization)
+
+# Add the executables
+add_executable(CCSDSCppProd src/ccsds/CCSDSProducer.cpp )
+add_executable(CCSDSCppCons src/ccsds/CCSDSConsumer.cpp )
+
+target_include_directories(CCSDSCppProd PUBLIC ${INC_DIR} "${PROJECT_SOURCE_DIR}/deps/gs_examples_serialization/ccsds/include")
+target_include_directories(CCSDSCppCons PUBLIC ${INC_DIR} "${PROJECT_SOURCE_DIR}/deps/gs_examples_serialization/ccsds/include")
+target_link_libraries(CCSDSCppProd PUBLIC ${LIBS} GSccsds)
+target_link_libraries(CCSDSCppCons PUBLIC ${LIBS} GSccsds)
+
 
 # Configuration File:
 set(SOURCE_FILE "${PROJECT_SOURCE_DIR}/config.txt")

@@ -5,9 +5,8 @@
 #include <condition_variable>
 #include <queue>
 
-#include "WFGenerator.hh"
-#include "ProtocolBufferEntities.hh"
-
+#include "generators.hh"
+#include "tchandler.h"
 
 #include "producer.hh"
 
@@ -38,7 +37,7 @@ int main(int argc, char* argv[]) {
         std::cout << "No argument provided. Using default value of " << N_mes << "." << std::endl;
     }
 
-    ThreadSafeQueue<std::string> serializedQueue;
+    std::queue<HeaderWF> serializedQueue;
     std::signal(SIGINT, signalHandler);
 
     std::ifstream config("config.txt");
@@ -52,58 +51,39 @@ int main(int argc, char* argv[]) {
     }
 
     auto generator = WFGenerator(1);    
-    MessageWriter<HeaderandWaveform> writer(serializedQueue);
-    std::vector<HeaderandWaveform> packets(N_mes);
 
     auto t1 = std::chrono::system_clock::now();
 
     std::cout << "Start Generating " << std::endl;
 
     for (int i = 0; i < N_mes && !stop; ++i) {
-        packets[i] = generator.get();
         
+        serializedQueue.push(generator.get());
         // std::cout <<  "Sending packet with run id: "<< genval.runID << ", decimation: " << genval.decimation << " and pc: " << genval.counter << std::endl;
        
-        if ( i % 10000 == 0 )
+        if( i % 10000 == 0 )
             std::cout << "Serialized " << i << "msgs" << std::endl;
         
-    }
-
-    auto t2 = std::chrono::system_clock::now();
-
-    std::cout << "Start Serializing " << std::endl;
-
-    int i = 0;
-    for (const auto& value : packets) {
-
-        writer.writeMessage(value);
-        
-        // std::cout <<  "Sending packet with run id: "<< genval.runID << ", decimation: " << genval.decimation << " and pc: " << genval.counter << std::endl;
-       
-        if ( i % 10000 == 0 )
-            std::cout << "Serialized " << i << "msgs" << std::endl;
-        i++;
     }
     std::cout << "MAIN:Lenght of queue: " << serializedQueue.size() << std::endl;
 
     zmq::context_t context(1);
-    Producer<std::string>* producer = new Producer<std::string>(context, "tcp://" + ip_port);
+    Producer<HeaderWF>* producer = new Producer<HeaderWF>(context, "tcp://" + ip_port);
 
-    auto t3a = std::chrono::system_clock::now();
+    auto t2a = std::chrono::system_clock::now();
 
     std::cout << "Start Sending" << std::endl;
+    
     bool first = true;
-    std::chrono::_V2::system_clock::time_point t3b;
+    std::chrono::_V2::system_clock::time_point t2b;
     while (!stop)
     {
         if(first){
             first = false;
-            t3b = std::chrono::system_clock::now();
+            t2b = std::chrono::system_clock::now();
         }
-        std::string item;
-        if (serializedQueue.pop(item)) {
-            producer->produce(item);
-        }
+        producer->produce(serializedQueue.front());
+        serializedQueue.pop();
         
         if(serializedQueue.size() % 1000 == 0)
             std::cout << "Lenght of queue: " << serializedQueue.size() << std::endl;
@@ -116,19 +96,16 @@ int main(int argc, char* argv[]) {
     
     std::cout << "Done" << std::endl;
 
-    auto t4 = std::chrono::system_clock::now();
+    auto t3 = std::chrono::system_clock::now();
     
-    std::chrono::duration<double> generation_seconds = t2 - t1;
-    std::chrono::duration<double> serialization_seconds = t3a - t2;
-    std::chrono::duration<double> comm_seconds = t4 - t3b;
+    std::chrono::duration<double> generation_seconds = t2a - t1;
+    std::chrono::duration<double> comm_seconds = t3 - t2b;
     
 
     // Display the time difference in seconds
     std::cout << "Produced number of messages: " << N_mes << std::endl ;
     std::cout << "Packer generation time : " << generation_seconds.count() << " seconds";
     std::cout << "; " << N_mes/generation_seconds.count() << " packet/s\n";
-    std::cout << "Serialization time : " << serialization_seconds.count() << " seconds";
-    std::cout << "; " << N_mes/serialization_seconds.count() << " packet/s\n";
     std::cout << "Communication time : " << comm_seconds.count() << " seconds";
     std::cout << "; " << N_mes/comm_seconds.count() << " packet/s\n";
     delete producer;
