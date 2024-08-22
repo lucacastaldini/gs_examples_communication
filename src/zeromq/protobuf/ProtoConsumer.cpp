@@ -7,7 +7,6 @@
 #include "WFGenerator.hh"
 #include "ProtocolBufferEntities.hh"
 
-
 #include "consumer.hh"
 #include "utils.hh"
 
@@ -21,7 +20,7 @@ int main(int argc, char* argv[]) {
 
     std::string ip_port = getIpPortFromConfig("config.txt");
  
-    ThreadSafeQueue<std::string> serializedQueue;
+    std::queue<std::string> serializedQueue;
     MessageReader<HeaderandWaveform> reader(serializedQueue);
 
     std::cout << "Start Receiving " << std::endl;
@@ -55,10 +54,8 @@ int main(int argc, char* argv[]) {
 
     N_cons = 0;
     while (!stop) {
-        HeaderandWaveform message;
-        if(reader.readMessage(message)){
-            results.push_back(message);
-        }
+        results.push_back(reader.readMessage());
+            
         printLoopStatistics(serializedQueue.size(), N_mes_update, [&serializedQueue](){
                 std::cout << "Remaining " << serializedQueue.size() << " packets" << std::endl;
             });
@@ -70,6 +67,12 @@ int main(int argc, char* argv[]) {
     std::cout << "Done" << std::endl;
 
     auto t3 = std::chrono::system_clock::now();
+
+    std::cout << "Printing last packet" << std::endl ;
+
+    print_WF(results.back(), 10);
+    
+    std::cout << std::endl ;
     
     std::chrono::duration<double> comm_seconds = t2 - t1;
     std::chrono::duration<double> des_seconds = t3 - t2;

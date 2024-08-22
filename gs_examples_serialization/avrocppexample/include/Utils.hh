@@ -10,6 +10,8 @@ void print_HK(HeaderHK h);
 
 void print_WF(const HeaderandWaveform& h);
 
+void print_WF(const HeaderandWaveform& h, const int limit_print);
+
 bool areEqual(const HK::TimeSpec& lhs, const HK::TimeSpec& rhs);
 
 bool areEqual(const WF::TimeSpec& lhs, const WF::TimeSpec& rhs);

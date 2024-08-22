@@ -16,7 +16,7 @@
 
 
 int main() {
-    ThreadSafeQueue<std::string> sharedQueue;
+    std::queue<std::string> sharedQueue;
     MessageWriter<HeaderandWaveform> writer(sharedQueue);
     MessageReader<HeaderandWaveform> reader(sharedQueue);
 
@@ -36,19 +36,30 @@ int main() {
         writer.writeMessage(message[i]);
     }
 
+    size_t total_size = sizeof(message[0]) + message[0].data().size() * sizeof(message[0].data().Get(0));
+    std::cout << "Approximate memory used by packet: " 
+            << total_size << " bytes" << std::endl;
+
+            // Get the size of the serialized packet
+    size_t serialized_size = message[0].ByteSizeLong();
+    std::cout << "Calculated Message size (serialized): " << serialized_size << " bytes" << std::endl;
+
+    // Calculate the compression ratio
+    double compression_ratio = static_cast<double>(total_size) / static_cast<double>(serialized_size);
+    std::cout << "Compression ratio: " << compression_ratio << std::endl;
+
+
     // // Read the message from the queue
     std::vector<HeaderandWaveform> recv_message(N) ;
     for (int i =0 ; i < N; i++){
-    if (reader.readMessage(recv_message[i])) {
-        std::cout << "Received HeaderandWaveform message:" << std::endl;
-        std::cout << "APID: " << recv_message[i].apid() << std::endl;
-        std::cout << "Counter: " << recv_message[i].counter() << std::endl;
-        std::cout << "Lenght of data: " << recv_message[i].data_size() << std::endl;
+        recv_message.at(i)=reader.readMessage() ;
+        // std::cout << "Received HeaderandWaveform message:" << std::endl;
+        // std::cout << "APID: " << recv_message[i].apid() << std::endl;
+        // std::cout << "Counter: " << recv_message[i].counter() << std::endl;
+        // std::cout << "Lenght of data: " << recv_message[i].data_size() << std::endl;
         // Output other fields as needed
-    } else {
-        std::cerr << "Failed to read the message." << std::endl;
     }
-    }
-    // print_WF(recv_message);
+    std::cout << "Print first packet" << std::endl;
+    print_WF(recv_message[0], 10);
     return 0;
 }

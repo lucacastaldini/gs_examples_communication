@@ -4,7 +4,6 @@
 
 #include "WFSchema.hh"
 #include "AvroEntities.hh"
-#include "Utils.hh"
 
 #include "consumer.hh"
 #include "utils.hh"
@@ -66,6 +65,7 @@ int main(int argc, char* argv[]) {
     N_cons = 0;
     while (!stop) {
         results.push_back(dser.decode());
+        
         printLoopStatistics(serializedQueue.size(), N_mes_update, [&serializedQueue](){
                 std::cout << "Remaining " << serializedQueue.size() << " packets" << std::endl;
             });
@@ -81,6 +81,12 @@ int main(int argc, char* argv[]) {
     std::chrono::duration<double> comm_seconds = t2 - t1;
     std::chrono::duration<double> des_seconds = t3 - t2;
 
+    std::cout << "Printing last packet" << std::endl ;
+
+    print_WF(results.back(), 10);
+
+    std::cout << std::endl ;
+
     std::cout << "Consumed number of messages: " << N_mes << std::endl ;
     std::cout << "Communication time : " << comm_seconds.count() << " seconds";
     std::cout << "; " << N_mes/comm_seconds.count() << " packet/s\n";
@@ -90,6 +96,7 @@ int main(int argc, char* argv[]) {
     std::cout << "; " << N_mes/(des_seconds.count() + comm_seconds.count()) << " packet/s\n";
 
     delete consumer;
+
     context.close();
 
     return 0;

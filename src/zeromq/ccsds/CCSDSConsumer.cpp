@@ -10,8 +10,6 @@
 #include "consumer.hh"
 #include "utils.hh"
 
-std::vector<HeaderWF> results;
-
 int main(int argc, char* argv[]) {
 
     std::signal(SIGINT, signalHandler);
@@ -53,6 +51,12 @@ int main(int argc, char* argv[]) {
 
     
     std::chrono::duration<double> comm_seconds = t2 - t1;
+
+    std::cout << "Printing last packet" << std::endl ;
+
+    HeaderWF::print(serializedQueue.back(), 10);
+    
+    std::cout << std::endl ;
 
     std::cout << "Consumed number of messages: " << N_mes << std::endl ;
     std::cout << "Communication time : " << comm_seconds.count() << " seconds";

@@ -31,6 +31,12 @@ void Data_Hk::print(const Data_Hk& data) {
 }
 
 void Data_Wf::print(const Data_Wf& data) {
+    Data_Wf::print(data, 0);
+}
+
+
+//limit print of data to first n samples, 0 prints all 
+void Data_Wf::print(const Data_Wf& data, const int limit_print){
     std::cout << "Data_Wf:" << std::endl;
     std::cout << "  Equalization Level: " << data.equalizationLevel << std::endl;
     std::cout << "  Decimation: " << data.decimation << std::endl;
@@ -38,14 +44,24 @@ void Data_Wf::print(const Data_Wf& data) {
     std::cout << "  Trigger Offset: " << data.trigOff << std::endl;
     std::cout << "  Size: " << data.size << std::endl;
     
+    size_t end;
+    std::string end_data ;
+    if(limit_print > 0){
+        end = limit_print;
+        end_data = ", ...";
+    }
+    else {
+        end = data.data.size();
+        end_data = "";
+    }
     std::cout << "  Data: [";
-    for (int i = 0; i < 10; ++i) {  // Print only the first 10 elements for brevity
+    for (size_t i = 0; i < end; ++i) {  // Print only the first 10 elements for brevity
         std::cout << data.data[i];
-        if (i < 9) {
+        if (i < end-1) {
             std::cout << ", ";
         }
     }
-    std::cout << ", ...]" << std::endl; // Indicating there are more elements not shown
+    std::cout << end_data << "]" << std::endl; // Indicating there are more elements not shown
     
     std::cout << "  CRC: 0x" << std::hex << data.crc << std::dec << std::endl;
 }
@@ -59,3 +75,10 @@ void HeaderWF::print(const HeaderWF& p) {
     Header::print(p.h);
     Data_Wf::print(p.d);
 }
+
+
+void HeaderWF::print(const HeaderWF& p, const int limit_print) {
+    Header::print(p.h);
+    Data_Wf::print(p.d, limit_print);
+}
+

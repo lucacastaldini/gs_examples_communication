@@ -82,6 +82,7 @@ public:
     };
 
     static void print(const Data_Wf& data);
+    static void print(const Data_Wf& data, const int limit_print);
 };
 
 class HeaderHK {
@@ -103,6 +104,7 @@ public:
 
 
     static void print(const HeaderWF& packet);
+    static void print(const HeaderWF& packet, const int limit_print);
 };
 
 

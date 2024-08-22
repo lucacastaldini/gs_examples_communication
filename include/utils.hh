@@ -26,4 +26,6 @@ void printMemoryUsage();
 
 void printLoopStatistics(size_t len, const int N_mes_update, std::function<void()> printMessage);
 
+std::pair<int, int> minmaxMessageSizes();
+
 #endif

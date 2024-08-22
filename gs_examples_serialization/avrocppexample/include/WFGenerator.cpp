@@ -4,7 +4,7 @@
 
 #include "WFGenerator.hh"
 
-#define WF_SIZE 16384
+
 const int32_t min_value = 0;
 const int32_t max_value = 16384; // 2^14
 // Constructor definition

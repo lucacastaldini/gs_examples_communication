@@ -39,8 +39,7 @@ int main(int argc, char* argv[]) {
                 std::cout << "Generated " << i << "msgs" << std::endl;
             });
     }
-    std::cout << "MAIN:Lenght of queue: " << serializedQueue.size() << std::endl;
-
+    
     zmq::context_t context(1);
     Producer<HeaderWF>* producer = new Producer<HeaderWF>(context, "tcp://" + ip_port);
 
@@ -60,7 +59,7 @@ int main(int argc, char* argv[]) {
         serializedQueue.pop();
         
         printLoopStatistics(serializedQueue.size(), N_mes_update, [&serializedQueue](){
-            std::cout << "Sent: " << serializedQueue.size() << " packets" << std::endl;
+            std::cout << "Remaining packets to send: " << serializedQueue.size() << std::endl;
         });
 
         if (serializedQueue.size()<=0){
@@ -75,6 +74,7 @@ int main(int argc, char* argv[]) {
     std::chrono::duration<double> generation_seconds = t2a - t1;
     std::chrono::duration<double> comm_seconds = t3 - t2b;
     
+    
 
     // Display the time difference in seconds
     std::cout << "Produced number of messages: " << N_mes << std::endl ;
@@ -82,6 +82,9 @@ int main(int argc, char* argv[]) {
     std::cout << "; " << N_mes/generation_seconds.count() << " packet/s\n";
     std::cout << "Sending time : " << comm_seconds.count() << " seconds";
     std::cout << "; " << N_mes/comm_seconds.count() << " packet/s\n";
+    size_t total_size = sizeof(HeaderWF);
+    std::cout << "Total memory used by packet: " 
+            << total_size << " bytes" << std::endl;
     delete producer;
     context.close();
 

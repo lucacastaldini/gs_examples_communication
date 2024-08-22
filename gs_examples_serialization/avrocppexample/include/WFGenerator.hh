@@ -9,6 +9,8 @@
 
 #include "WFSchema.hh" // Replace with the actual header file that defines c::HeaderHK
 
+#define WF_SIZE 16384
+
 class WFGenerator {
 public:
 

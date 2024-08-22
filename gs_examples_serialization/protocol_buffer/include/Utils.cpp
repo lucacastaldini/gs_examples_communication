@@ -6,8 +6,8 @@ void print_HK(HeaderHK h) {
     std::cout << "apid: " << h.apid() << std::endl;
     std::cout << "configID: " << h.configid() << std::endl;
     std::cout << "counter: " << h.counter() << std::endl;
-    std::cout << "crc: " << h.crc() << std::endl;
-    std::cout << "flags: " << h.flags() << std::endl;
+    std::cout << "CRC: 0x" << std::hex << h.crc() << std::dec << std::endl;
+    std::cout << "Flags: 0x" << std::hex << h.flags() << std::dec << std::endl;
     std::cout << "runID: " << h.runid() << std::endl;
     std::cout << "time s: " << h.time().tv_sec() << std::endl;
     std::cout << "time ns: " << h.time().tv_nsec() << std::endl;
@@ -15,13 +15,13 @@ void print_HK(HeaderHK h) {
     std::cout << "wformcount: " << h.wformcount() << std::endl;
 }
 
-// Function to print HeaderandWaveform
-void print_WF(const HeaderandWaveform& h) {
+
+//limit print of data to first n samples, 0 prints all 
+void print_WF(const HeaderandWaveform& h, const int limit_print) {
     std::cout << "abstime: " << h.abstime() << std::endl;
     std::cout << "apid: " << h.apid() << std::endl;
     std::cout << "configID: " << h.configid() << std::endl;
     std::cout << "counter: " << h.counter() << std::endl;
-    std::cout << "crc: " << h.crc() << std::endl;
     std::cout << "runID: " << h.runid() << std::endl;
     std::cout << "time s: " << h.time().tv_sec() << std::endl;
     std::cout << "time ns: " << h.time().tv_nsec() << std::endl;
@@ -31,11 +31,34 @@ void print_WF(const HeaderandWaveform& h) {
     std::cout << "curOffset: " << h.curoffset() << std::endl;
     std::cout << "trigOff: " << h.trigoff() << std::endl;
     std::cout << "size: " << h.size() << std::endl;
-    std::cout << "data: ";
-    for (std::size_t i = 0; i < h.data().size(); ++i) {
-        std::cout << h.data().Get(i) << " ";
+
+    size_t end;
+    std::string end_data ;
+    if(limit_print > 0){
+        end = limit_print;
+        end_data = ", ...";
     }
+    else {
+        end = h.data().size();
+        end_data = "";
+    }
+    std::cout << "  Data: [";
+    for (size_t i = 0; i < end; ++i) {  // Print only the first 10 elements for brevity
+        std::cout << h.data().Get(i);
+        if (i < end-1) {
+            std::cout << ", ";
+        }
+    }
+    std::cout << end_data << "]" << std::endl; // Indicating there are more elements not shown
+
+    std::cout << "CRC: 0x" << std::hex << h.crc() << std::dec << std::endl;
+
     std::cout << std::endl;
+}
+
+// Function to print HeaderandWaveform
+void print_WF(const HeaderandWaveform& h){
+    print_WF(h, 0);
 }
 
 // // Function to compare TimeSpec instances

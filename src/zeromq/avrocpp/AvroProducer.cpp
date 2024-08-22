@@ -47,25 +47,25 @@ int main(int argc, char* argv[]) {
     auto t2 = std::chrono::system_clock::now();
 
     std::cout << "Start Serializing " << std::endl;
-    int i = 0;
+    
     for (const auto& value : *packets) {
         ser.encode(&value);
         
         // std::cout <<  "Sending packet with run id: "<< genval.runID << ", decimation: " << genval.decimation << " and pc: " << genval.counter << std::endl;
 
-        printLoopStatistics(serializedQueue.size(), N_mes_update, [&i](){
-            std::cout << "Serialized " << i << "msgs" << std::endl;
+        printLoopStatistics(serializedQueue.size(), N_mes_update, [&serializedQueue](){
+            std::cout << "Serialized " << serializedQueue.size() << "msgs" << std::endl;
         });
         
-        i++;
-        
     }
-    delete packets;
 
-    std::cout << "MAIN:Lenght of queue: " << serializedQueue.size() << std::endl;
+    size_t total_size = sizeof(packets[0]) + packets->at(0).data.size() * sizeof(int32_t);
+    delete packets;
 
     zmq::context_t context(1);
     Producer<std::vector<uint8_t>>* producer = new Producer<std::vector<uint8_t>>(context, "tcp://" + ip_port);
+
+    size_t serialized_size = serializedQueue.front().size();
 
     auto t3a = std::chrono::system_clock::now();
 
@@ -82,7 +82,7 @@ int main(int argc, char* argv[]) {
         serializedQueue.pop();
         
         printLoopStatistics(serializedQueue.size(), N_mes_update, [&serializedQueue](){
-            std::cout << "Sent: " << serializedQueue.size() << " packets" << std::endl;
+            std::cout << "Remaining packets to send: " << serializedQueue.size() << std::endl;
         });
         
         /* code */
@@ -90,6 +90,7 @@ int main(int argc, char* argv[]) {
             break;
         }
     }
+    
     
     std::cout << "Done" << std::endl;
 
@@ -110,6 +111,18 @@ int main(int argc, char* argv[]) {
     std::cout << "; " << N_mes/comm_seconds.count() << " packet/s\n";
     std::cout << "Total Sending time : " << serialization_seconds.count() + comm_seconds.count() << " seconds";
     std::cout << "; " << N_mes/(serialization_seconds.count() + comm_seconds.count()) << " packet/s\n";
+
+    
+    std::cout << "Total memory used by packet (including vector data): " 
+            << total_size << " bytes" << std::endl;
+
+    // Get the size of the serialized packet
+    
+    std::cout << "Message size (serialized): " << serialized_size << " bytes" << std::endl;
+
+    // Calculate the compression ratio
+    double compression_ratio = static_cast<double>(total_size) / static_cast<double>(serialized_size);
+    std::cout << "Compression ratio: " << compression_ratio << std::endl;
     
     delete producer;
     context.close();

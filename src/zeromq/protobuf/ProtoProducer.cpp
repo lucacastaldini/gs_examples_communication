@@ -22,7 +22,7 @@ int main(int argc, char* argv[]) {
 
     std::cout << "Start Generating " << std::endl;
 
-    ThreadSafeQueue<std::string> serializedQueue;
+    std::queue<std::string> serializedQueue;
     std::signal(SIGINT, signalHandler);
 
 
@@ -50,20 +50,22 @@ int main(int argc, char* argv[]) {
 
     std::cout << "Start Serializing " << std::endl;
 
-    int i = 0;
     for (const auto& value : *packets) {
 
         writer.writeMessage(value);
         
         // std::cout <<  "Sending packet with run id: "<< genval.runID << ", decimation: " << genval.decimation << " and pc: " << genval.counter << std::endl;
        
-        printLoopStatistics(serializedQueue.size(), N_mes_update, [&i](){
-            std::cout << "Serialized " << i << "msgs" << std::endl;
+        printLoopStatistics(serializedQueue.size(), N_mes_update, [&serializedQueue](){
+            std::cout << "Serialized " << serializedQueue.size() << "msgs" << std::endl;
         });
-        i++;
+
     }
+
+    size_t total_size = sizeof(packets[0]) + packets->at(0).data().size() * sizeof(packets->at(0).data().Get(0));
+
+    size_t serialized_size = packets->at(0).ByteSizeLong();
     delete packets;
-    std::cout << "MAIN:Lenght of queue: " << serializedQueue.size() << std::endl;
 
     zmq::context_t context(1);
     Producer<std::string>* producer = new Producer<std::string>(context, "tcp://" + ip_port);
@@ -79,13 +81,12 @@ int main(int argc, char* argv[]) {
             first = false;
             t3b = std::chrono::system_clock::now();
         }
-        std::string item;
-        if (serializedQueue.pop(item)) {
-            producer->produce(item);
-        }
+        
+        producer->produce(serializedQueue.front());
+        serializedQueue.pop();
         
         printLoopStatistics(serializedQueue.size(), N_mes_update, [&serializedQueue](){
-            std::cout << "Sent: " << serializedQueue.size() << " packets" << std::endl;
+            std::cout << "Remaining packets to send: " << serializedQueue.size() << std::endl;
         });
 
         if (serializedQueue.size()<=0){
@@ -113,6 +114,16 @@ int main(int argc, char* argv[]) {
     std::cout << "; " << N_mes/comm_seconds.count() << " packet/s\n";
     std::cout << "Total Sending time : " << serialization_seconds.count() + comm_seconds.count() << " seconds";
     std::cout << "; " << N_mes/(serialization_seconds.count() + comm_seconds.count()) << " packet/s\n";
+
+    std::cout << "Approximate memory used by packet: " 
+            << total_size << " bytes" << std::endl;
+
+            // Get the size of the serialized packet
+    std::cout << "Calculated Message size (serialized): " << serialized_size << " bytes" << std::endl;
+
+    // Calculate the compression ratio
+    double compression_ratio = static_cast<double>(total_size) / static_cast<double>(serialized_size);
+    std::cout << "Compression ratio: " << compression_ratio << std::endl;
     delete producer;
     context.close();
 

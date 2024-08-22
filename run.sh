@@ -57,11 +57,11 @@ PRODUCER_PROGRAM="./${SCHEMA}CppProd"
 cd build || { echo "Failed to change directory to build. Exiting."; exit 1; }
 
 # Start the consumer program in the background, redirecting stdout and stderr to log files
-$CONSUMER_PROGRAM ${NUMBER:+-n $NUMBER} > "${LOG_DIR}/${CONSUMER_PROGRAM}.log" 2>&1 &
+$CONSUMER_PROGRAM $NUMBER > "${LOG_DIR}/${CONSUMER_PROGRAM}.log" 2>&1 &
 CONSUMER_PID=$!
 
 # Start the producer program in the background, redirecting stdout and stderr to log files
-$PRODUCER_PROGRAM ${NUMBER:+-n $NUMBER} > "${LOG_DIR}/${PRODUCER_PROGRAM}.log" 2>&1 &
+$PRODUCER_PROGRAM $NUMBER > "${LOG_DIR}/${PRODUCER_PROGRAM}.log" 2>&1 &
 PRODUCER_PID=$!
 
 # Wait for both programs to complete
