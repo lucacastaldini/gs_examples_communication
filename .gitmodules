@@ -4,6 +4,4 @@
 [submodule "zeromq/deps/cppzmq"]
 	path = zeromq/deps/cppzmq
 	url = https://github.com/zeromq/cppzmq.git
-[submodule "gs_examples_serialization"]
-	path = gs_examples_serialization
-	url = https://github.com/lucacastaldini/gs_examples_serialization.git
+
