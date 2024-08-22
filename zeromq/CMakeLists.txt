@@ -9,13 +9,14 @@ set(CMAKE_INCLUDE_CURRENT_DIR TRUE)
 # Find required protobuf package
 find_package(protobuf CONFIG REQUIRED)
 
+set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+
 add_subdirectory("${CMAKE_SOURCE_DIR}/deps/gs_examples_serialization/avrocppexample")
 add_subdirectory("${CMAKE_SOURCE_DIR}/deps/gs_examples_serialization/protocol_buffer")
 add_subdirectory("${CMAKE_SOURCE_DIR}/deps/gs_examples_serialization/ccsds")
 
-set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
 # Specify the paths to the Avro include directory and library
 set(INC_DIR

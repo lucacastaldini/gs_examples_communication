@@ -41,9 +41,9 @@ int main(int argc, char* argv[]) {
             }
             serializedQueue.push(std::move(value));  // Push the consumed value into the queue
             ++N_cons;
-            if ( N_cons % 10000 == 0 )
-                std::cout << "Consumed " << N_cons << " messages." << std::endl;
-            
+            printLoopStatistics(N_cons, N_mes_update, [&N_cons](){
+                std::cout << "Received " << N_cons << " messages" << std::endl;
+            });
             if( N_cons >= N_mes )
                 break;
         }

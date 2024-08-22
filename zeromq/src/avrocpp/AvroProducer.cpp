@@ -38,10 +38,10 @@ int main(int argc, char* argv[]) {
         packets->at(i) = generated;
         
         // std::cout <<  "Sending packet with run id: "<< genval.runID << ", decimation: " << genval.decimation << " and pc: " << genval.counter << std::endl;
-       
-        if ( i % N_mes_update == 0 )
-            std::cout << "Serialized " << i << "msgs" << std::endl;
-        
+        printLoopStatistics(i, N_mes_update, [&i](){
+                std::cout << "Generated " << i << "msgs" << std::endl;
+            });
+            
     }
 
     auto t2 = std::chrono::system_clock::now();
@@ -52,9 +52,11 @@ int main(int argc, char* argv[]) {
         ser.encode(&value);
         
         // std::cout <<  "Sending packet with run id: "<< genval.runID << ", decimation: " << genval.decimation << " and pc: " << genval.counter << std::endl;
-       
-        if ( i % N_mes_update == 0 )
+
+        printLoopStatistics(serializedQueue.size(), N_mes_update, [&i](){
             std::cout << "Serialized " << i << "msgs" << std::endl;
+        });
+        
         i++;
         
     }
@@ -79,14 +81,15 @@ int main(int argc, char* argv[]) {
         producer->produce(serializedQueue.front());
         serializedQueue.pop();
         
-        if(serializedQueue.size() % N_mes_update == 0)
-            std::cout << "Lenght of queue: " << serializedQueue.size() << std::endl;
+        printLoopStatistics(serializedQueue.size(), N_mes_update, [&serializedQueue](){
+            std::cout << "Sent: " << serializedQueue.size() << " packets" << std::endl;
+        });
+        
         /* code */
         if (serializedQueue.size()<=0){
             break;
         }
     }
-    
     
     std::cout << "Done" << std::endl;
 

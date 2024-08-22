@@ -48,9 +48,12 @@ int main(int argc, char* argv[]) {
             }
             serializedQueue.push(std::move(value));  // Push the consumed value into the queue
             ++N_cons;
-            if ( N_cons % 10000 == 0 )
-                std::cout << "Consumed " << N_cons << " messages." << std::endl;
-            
+            if ( N_cons % N_mes_update == 0 )
+
+            printLoopStatistics(N_cons, N_mes_update, [&N_cons](){
+                std::cout << "Received " << N_cons << " messages" << std::endl;
+            });
+
             if( N_cons >= N_mes )
                 break;
         }
@@ -58,12 +61,14 @@ int main(int argc, char* argv[]) {
 
     auto t2 = std::chrono::system_clock::now();
 
+    std::cout << "Start Deserializing " << std::endl;
+
     N_cons = 0;
     while (!stop) {
         results.push_back(dser.decode());
-        if(serializedQueue.size() % 1000 == 0)
-            std::cout << "Lenght of queue: " << serializedQueue.size() << std::endl;
-        
+        printLoopStatistics(serializedQueue.size(), N_mes_update, [&serializedQueue](){
+                std::cout << "Remaining " << serializedQueue.size() << " packets" << std::endl;
+            });
         // std::cout <<  "Received packet with run id: "<< results.back().runID << ", decimation: " << results.back().decimation << " and pc: " << results.back().counter << std::endl;
         if (serializedQueue.size() <= 0) 
             break; 

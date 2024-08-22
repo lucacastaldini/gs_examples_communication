@@ -2,6 +2,7 @@
 #include <atomic>
 #include <iostream>
 #include <fstream>
+#include <sys/resource.h>
 
 #include "utils.hh"
 
@@ -20,7 +21,9 @@ const int parseArguments(int argc, char* argv[]) {
 
     if (argc > 1) {
         try {
-            N_mes = std::stoi(argv[1]);  // Convert the argument to an integer
+            int got = std::stoi(argv[1]);  // Convert the argument to an integer
+            if (got < 1) throw std::invalid_argument("N_mes must be greater or equal to 1");
+            else N_mes = got;
         } catch (const std::invalid_argument& e) {
             std::cerr << "Invalid argument: " << argv[1] << ". Using default value of " << N_mes << "." << std::endl;
         } catch (const std::out_of_range& e) {
@@ -34,7 +37,11 @@ const int parseArguments(int argc, char* argv[]) {
 }
 
 const int getMessageUpdate(const int N_mes){
-    return N_mes / N_MES_UPDATE_SCALER ;
+    double res = N_mes / (float) N_MES_UPDATE_SCALER;
+    if (res <= 1)
+        return 1;
+    else
+        return (int) res;
 }
 
 // Function to read the IP and port from a config file
@@ -95,4 +102,20 @@ bool sendMessage(zmq::socket_t& socket, std::function<zmq::message_t()> prepareM
         socket.send(message, zmq::send_flags::none);
         return true;
     });
+}
+
+void printLoopStatistics( size_t len, const int N_mes_update, std::function<void()> printMessage) {
+    if (len % N_mes_update == 0) {
+        printMessage();
+        printMemoryUsage();
+    }
+}
+
+void printMemoryUsage() {
+    struct rusage usage;
+    if (getrusage(RUSAGE_SELF, &usage) == 0) {
+        std::cout << "Max resident set size: " << usage.ru_maxrss << " KB" << std::endl;
+    } else {
+        std::cerr << "Failed to get memory usage." << std::endl;
+    }
 }

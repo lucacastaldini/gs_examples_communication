@@ -22,4 +22,8 @@ bool receiveMessage(zmq::socket_t& socket, std::function<void(const zmq::message
 
 bool sendMessage(zmq::socket_t& socket, std::function<zmq::message_t()> prepareMessage);
 
+void printMemoryUsage();
+
+void printLoopStatistics(size_t len, const int N_mes_update, std::function<void()> printMessage);
+
 #endif

@@ -35,9 +35,9 @@ int main(int argc, char* argv[]) {
         serializedQueue.push(generator.get());
         // std::cout <<  "Sending packet with run id: "<< genval.runID << ", decimation: " << genval.decimation << " and pc: " << genval.counter << std::endl;
        
-        if( i % 10000 == 0 )
-            std::cout << "Serialized " << i << "msgs" << std::endl;
-        
+        printLoopStatistics(i, N_mes_update, [&i](){
+                std::cout << "Generated " << i << "msgs" << std::endl;
+            });
     }
     std::cout << "MAIN:Lenght of queue: " << serializedQueue.size() << std::endl;
 
@@ -59,14 +59,14 @@ int main(int argc, char* argv[]) {
         producer->produce(serializedQueue.front());
         serializedQueue.pop();
         
-        if(serializedQueue.size() % 1000 == 0)
-            std::cout << "Lenght of queue: " << serializedQueue.size() << std::endl;
-        /* code */
+        printLoopStatistics(serializedQueue.size(), N_mes_update, [&serializedQueue](){
+            std::cout << "Sent: " << serializedQueue.size() << " packets" << std::endl;
+        });
+
         if (serializedQueue.size()<=0){
             break;
         }
     }
-    
     
     std::cout << "Done" << std::endl;
 

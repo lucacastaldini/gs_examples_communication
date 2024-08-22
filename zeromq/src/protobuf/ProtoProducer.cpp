@@ -14,32 +14,17 @@
 
 int main(int argc, char* argv[]) {
 
-    int N_mes = N_MES_DEF;
-    if (argc > 1) {
-        // Check if the second argument is a valid integer
-        try {
-            N_mes = std::stoi(argv[1]); // Convert the argument to an integer
-        } catch (const std::invalid_argument& e) {
-            std::cerr << "Invalid argument: " << argv[1] << ". Using default value of " << N_mes << "." << std::endl;
-        } catch (const std::out_of_range& e) {
-            std::cerr << "Argument out of range: " << argv[1] << ". Using default value of " << N_mes << "." << std::endl;
-        }
-    } else {
-        std::cout << "No argument provided. Using default value of " << N_mes << "." << std::endl;
-    }
+    const int N_mes = parseArguments(argc, argv);
+    const int N_mes_update = getMessageUpdate(N_mes);
+    std::cout << "message update every " << N_mes_update << " msgs" << std::endl;
+
+    std::string ip_port = getIpPortFromConfig("config.txt");
+
+    std::cout << "Start Generating " << std::endl;
 
     ThreadSafeQueue<std::string> serializedQueue;
     std::signal(SIGINT, signalHandler);
 
-    std::ifstream config("config.txt");
-    std::string ip_port;
-    if (config.is_open()) {
-        std::getline(config, ip_port);
-        config.close();
-    } else {
-        std::cerr << "Unable to open config file!" << std::endl;
-        return 1;
-    }
 
     auto generator = WFGenerator(1);    
     MessageWriter<HeaderandWaveform> writer(serializedQueue);
@@ -55,9 +40,10 @@ int main(int argc, char* argv[]) {
         
         // std::cout <<  "Sending packet with run id: "<< genval.runID << ", decimation: " << genval.decimation << " and pc: " << genval.counter << std::endl;
        
-        if ( i % 10000 == 0 )
-            std::cout << "Serialized " << i << "msgs" << std::endl;
-        
+        printLoopStatistics(i, N_mes_update, [&i](){
+                std::cout << "Generated " << i << "msgs" << std::endl;
+            });
+
     }
 
     auto t2 = std::chrono::system_clock::now();
@@ -71,8 +57,9 @@ int main(int argc, char* argv[]) {
         
         // std::cout <<  "Sending packet with run id: "<< genval.runID << ", decimation: " << genval.decimation << " and pc: " << genval.counter << std::endl;
        
-        if ( i % 10000 == 0 )
+        printLoopStatistics(serializedQueue.size(), N_mes_update, [&i](){
             std::cout << "Serialized " << i << "msgs" << std::endl;
+        });
         i++;
     }
     delete packets;
@@ -97,9 +84,10 @@ int main(int argc, char* argv[]) {
             producer->produce(item);
         }
         
-        if(serializedQueue.size() % 1000 == 0)
-            std::cout << "Lenght of queue: " << serializedQueue.size() << std::endl;
-        /* code */
+        printLoopStatistics(serializedQueue.size(), N_mes_update, [&serializedQueue](){
+            std::cout << "Sent: " << serializedQueue.size() << " packets" << std::endl;
+        });
+
         if (serializedQueue.size()<=0){
             break;
         }

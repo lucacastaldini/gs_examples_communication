@@ -15,33 +15,13 @@ std::vector<HeaderandWaveform> results;
 
 int main(int argc, char* argv[]) {
 
-    int N_mes = N_MES_DEF;
-    if (argc > 1) {
-        // Check if the second argument is a valid integer
-        try {
-            N_mes = std::stoi(argv[1]); // Convert the argument to an integer
-        } catch (const std::invalid_argument& e) {
-            std::cerr << "Invalid argument: " << argv[1] << ". Using default value of " << N_mes << "." << std::endl;
-        } catch (const std::out_of_range& e) {
-            std::cerr << "Argument out of range: " << argv[1] << ". Using default value of " << N_mes << "." << std::endl;
-        }
-    } else {
-        std::cout << "No argument provided. Using default value of " << N_mes << "." << std::endl;
-    }
+    const int N_mes = parseArguments(argc, argv);
+    const int N_mes_update = getMessageUpdate(N_mes);
+    std::cout << "message update every " << N_mes_update << " msgs" << std::endl;
 
-    ThreadSafeQueue<std::string> serializedQueue;
-    std::signal(SIGINT, signalHandler);
-
-    std::ifstream config("config.txt");
-    std::string ip_port;
-    if (config.is_open()) {
-        std::getline(config, ip_port);
-        config.close();
-    } else {
-        std::cerr << "Unable to open config file!" << std::endl;
-        return 1;
-    }
+    std::string ip_port = getIpPortFromConfig("config.txt");
  
+    ThreadSafeQueue<std::string> serializedQueue;
     MessageReader<HeaderandWaveform> reader(serializedQueue);
 
     std::cout << "Start Receiving " << std::endl;
@@ -61,9 +41,9 @@ int main(int argc, char* argv[]) {
             }
             serializedQueue.push(value);  // Push the consumed value into the queue
             ++N_cons;
-            if ( N_cons % 10000  )
-                std::cout << "Consumed " << N_cons << " messages." << std::endl;
-            
+            printLoopStatistics(N_cons, N_mes_update, [&N_cons](){
+                std::cout << "Received " << N_cons << " messages" << std::endl;
+            });
             if( N_cons >= N_mes )
                 break;
         }
@@ -71,15 +51,17 @@ int main(int argc, char* argv[]) {
 
     auto t2 = std::chrono::system_clock::now();
 
+    std::cout << "Start Deserializing " << std::endl;
+
     N_cons = 0;
     while (!stop) {
         HeaderandWaveform message;
         if(reader.readMessage(message)){
             results.push_back(message);
         }
-        if(serializedQueue.size() % 10000 == 0 )
-            std::cout << "Lenght of queue: " << serializedQueue.size() << std::endl;
-        
+        printLoopStatistics(serializedQueue.size(), N_mes_update, [&serializedQueue](){
+                std::cout << "Remaining " << serializedQueue.size() << " packets" << std::endl;
+            });
         // std::cout <<  "Received packet with run id: "<< results.back().runID << ", decimation: " << results.back().decimation << " and pc: " << results.back().counter << std::endl;
         if (serializedQueue.size() <= 0) 
             break; 
