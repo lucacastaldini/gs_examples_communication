@@ -36,7 +36,6 @@ private:
     std::unique_lock<std::mutex> m_lock; // Lock the mutex
 public:
     Producer( std::queue<T>& buffer, std::mutex& mtx ) : m_buffer(buffer) , m_mtx(mtx) , m_lock(m_mtx, std::defer_lock){} ;
-
     void produce(T value) {
 
         m_lock.lock(); // Lock the mutex
