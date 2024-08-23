@@ -26,6 +26,7 @@ public:
     bool consume(T &value)
     {
         return receiveMessage(socket, [&value](const zmq::message_t &message) {
+            // std::cout << "msg size is: " << message.size() << std::endl;
             memcpy(&value, message.data(), sizeof(T));
         });
     }
@@ -55,11 +56,11 @@ public:
     bool consume(std::vector<T> &vec)
     {
         return receiveMessage(socket, [&vec](const zmq::message_t &message) {
-            size_t size;
-            memcpy(&size, message.data(), sizeof(size_t));
-            std::cout << "msg size is: " << size << std::endl;
+            int32_t size;
+            memcpy(&size, message.data(), sizeof(int32_t));
+            // std::cout << "msg size is: " << message.size() << std::endl;
             vec.resize(size);
-            memcpy(vec.data(), static_cast<const char *>(message.data()) + sizeof(size_t), size * sizeof(T));
+            memcpy(vec.data(), static_cast<const char *>(message.data()) + sizeof(int32_t), size * sizeof(T));
         });
     }
 
