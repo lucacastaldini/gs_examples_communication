@@ -58,9 +58,7 @@ set(ZMQ_COMMON_SRCS
     ${COMMON_SRCS}
 )
 
-# Find cppzmq wrapper
 find_package(cppzmq REQUIRED)
-find_package(absl REQUIRED)
 
 list(APPEND LIBS 
     cppzmq
