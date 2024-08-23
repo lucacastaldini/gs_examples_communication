@@ -57,6 +57,7 @@ public:
         return receiveMessage(socket, [&vec](const zmq::message_t &message) {
             size_t size;
             memcpy(&size, message.data(), sizeof(size_t));
+            std::cout << "msg size is: " << size << std::endl;
             vec.resize(size);
             memcpy(vec.data(), static_cast<const char *>(message.data()) + sizeof(size_t), size * sizeof(T));
         });
