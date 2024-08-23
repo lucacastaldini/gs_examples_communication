@@ -2,12 +2,11 @@ cmake_minimum_required(VERSION 3.10)
 project(GSCommunication CXX)
 
 # Ensure that we are using static libraries, including Protocol Buffers
-set(protobuf_BUILD_SHARED_LIBS OFF)  # Disable shared libraries for protobuf
+
 set(BUILD_SHARED_LIBS OFF)  # Globally disable shared libraries
 
 set(CMAKE_INCLUDE_CURRENT_DIR TRUE)
 # Find required protobuf package
-find_package(protobuf CONFIG REQUIRED)
 
 set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_CXX_STANDARD 17)
@@ -31,6 +30,8 @@ endif()
 
 # Add Protocol Buffer subdirectory conditionally
 if(BUILD_PB)
+    set(protobuf_BUILD_SHARED_LIBS OFF)  # Disable shared libraries for protobuf
+    find_package(protobuf CONFIG REQUIRED)
     add_subdirectory(${GS_SERIALIZATION_DIR}/protocol_buffer)
 endif()
 
