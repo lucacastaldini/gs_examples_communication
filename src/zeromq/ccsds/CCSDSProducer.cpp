@@ -49,7 +49,9 @@ int main(int argc, char* argv[]) {
     
     bool first = true;
     std::chrono::_V2::system_clock::time_point t2b;
-    auto saved=serializedQueue.back();
+
+    auto saved = serializedQueue.back();
+
     while (!stop)
     {
         if(first){
@@ -77,8 +79,9 @@ int main(int argc, char* argv[]) {
     
     std::cout << "Printing last packet" << std::endl ;
 
-    HeaderWF::print(saved, 10);
 
+    HeaderWF::print(saved, 10);
+    
     // Display the time difference in seconds
     std::cout << "Produced number of messages: " << N_mes << std::endl ;
     std::cout << "Packer generation time : " << generation_seconds.count() << " seconds";
