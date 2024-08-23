@@ -4,7 +4,14 @@
 
     tested on RP installing from sources libzmq and cppzmq from master branch. 
 
-    dependencies provided as submodules in ./zeromq/deps
+    zeromq folder has the required code to send packets via cppzmq
+
+    it is provided a standalone example to stream integers.
+    Examples streaming data packets with serialization are provided and require libraries built on 
+    the project https://github.com/lucacastaldini/gs_examples_serialization.git, provided as submodule.
+
+
+    other dependencies provided as submodules in ./zeromq/deps
 
     ```
     git submodule update --init
@@ -13,12 +20,21 @@
 
     then follow the build guide: https://github.com/zeromq/cppzmq/blob/master/README.md
 
-    to install software:
+    
+
+    to install software, create a build folder and change dir into:
 ```
-    cd zeromq/
-    mkdir build
-    cd build 
+    ...gs_examples_communication$ mkdir build
+    ...gs_examples_communication$ cd build 
+```
+    to build all:
+```
     cmake ..
+    make
+```
+    to build only specific tests, it is possbile to select the build target by specifying them via command line arguments. It is shown how to compile only Avro and CCSDS tests:
+```
+    cmake .. -DBUILD_EXAMPLES=OFF -DBUILD_AVRO=ON -DBUILD_PB=OFF -DBUILD_CCSDS=ON -DBUILD_SHM=OFF
     make
 ```
 
