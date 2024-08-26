@@ -20,7 +20,7 @@ int main(int argc, char* argv[]) {
     std::cout << "message update every " << N_mes_update << " msgs" << std::endl;
 
     std::string ip_port = getIpPortFromConfig("config.txt");
-
+    std::cout << "Sending with address:" << ip_port << std::endl;
     std::queue<HeaderWF> serializedQueue;
     std::signal(SIGINT, signalHandler);
 
@@ -49,6 +49,9 @@ int main(int argc, char* argv[]) {
     
     bool first = true;
     std::chrono::_V2::system_clock::time_point t2b;
+
+    auto saved = serializedQueue.back();
+
     while (!stop)
     {
         if(first){
@@ -74,8 +77,11 @@ int main(int argc, char* argv[]) {
     std::chrono::duration<double> generation_seconds = t2a - t1;
     std::chrono::duration<double> comm_seconds = t3 - t2b;
     
-    
+    std::cout << "Printing last packet" << std::endl ;
 
+
+    HeaderWF::print(saved, 10);
+    
     // Display the time difference in seconds
     std::cout << "Produced number of messages: " << N_mes << std::endl ;
     std::cout << "Packer generation time : " << generation_seconds.count() << " seconds";

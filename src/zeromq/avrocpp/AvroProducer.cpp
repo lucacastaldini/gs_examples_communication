@@ -21,6 +21,7 @@ int main(int argc, char* argv[]) {
     std::cout << "message update every " << N_mes_update << " msgs" << std::endl;
 
     std::string ip_port = getIpPortFromConfig("config.txt");
+    std::cout << "Sending with address:" << ip_port << std::endl;
 
     std::queue<std::vector<uint8_t>> serializedQueue;
 

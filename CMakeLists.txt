@@ -1,14 +1,16 @@
 cmake_minimum_required(VERSION 3.10)
+# set(CMAKE_SYSTEM_PROCESSOR x86_64)
+
+# set(CMAKE_C_COMPILER x86_64-linux-gnu-gcc)
+# set(CMAKE_CXX_COMPILER "x86_64-linux-gnu-g++")
 project(GSCommunication CXX)
 
 # Ensure that we are using static libraries, including Protocol Buffers
-set(protobuf_BUILD_SHARED_LIBS OFF)  # Disable shared libraries for protobuf
+
 set(BUILD_SHARED_LIBS OFF)  # Globally disable shared libraries
 
 set(CMAKE_INCLUDE_CURRENT_DIR TRUE)
 # Find required protobuf package
-find_package(protobuf CONFIG REQUIRED)
-
 set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
@@ -31,6 +33,8 @@ endif()
 
 # Add Protocol Buffer subdirectory conditionally
 if(BUILD_PB)
+    set(protobuf_BUILD_SHARED_LIBS OFF)  # Disable shared libraries for protobuf
+    find_package(protobuf CONFIG REQUIRED)
     add_subdirectory(${GS_SERIALIZATION_DIR}/protocol_buffer)
 endif()
 
@@ -57,9 +61,9 @@ set(ZMQ_COMMON_SRCS
     ${COMMON_SRCS}
 )
 
-# Find cppzmq wrapper
 find_package(cppzmq REQUIRED)
-find_package(absl REQUIRED)
+message(STATUS "cppzmq version: ${cppzmq_VERSION}")
+
 
 list(APPEND LIBS 
     cppzmq
