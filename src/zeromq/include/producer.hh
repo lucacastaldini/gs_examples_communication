@@ -37,7 +37,7 @@ public:
             zmq::message_t message(sizeof(T));
             // Copy the value into the message data
             memcpy(message.data(), &value, sizeof(T));
-            std::cout << "msg size is: " << message.size() << std::endl;
+            //std::cout << "msg size is: " << message.size() << std::endl;
 	    // Return the message
             return message;
         });
@@ -85,7 +85,7 @@ public:
                 memcpy(message.data(), &size, sizeof(int32_t));
                 
 		memcpy(static_cast<char *>(message.data()) + sizeof(int32_t), vec.data(), size * sizeof(T));
-                std::cout << "msg size is : " << message.size() << std::endl;
+                //std::cout << "msg size is : " << message.size() << std::endl;
 
 		return message;
             });
